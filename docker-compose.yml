@@ -5,27 +5,53 @@ services:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=flowops
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    networks:
+      - flowops-network
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - flowops-network
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.core.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db/flowops
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - db
     networks:
       - flowops-network
 
   backend:
     build:
       context: ./backend
-      dockerfile: ../docker/backend.Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./backend:/app
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - POSTGRES_SERVER=db
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/flowops
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - db
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -35,14 +61,17 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: ../docker/frontend.Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=development
     env_file:
       - .env
+    command: npm run dev
     depends_on:
       - backend
     networks:
@@ -50,6 +79,7 @@ services:
 
 volumes:
   postgres_data:
+
 
 networks:
   flowops-network:

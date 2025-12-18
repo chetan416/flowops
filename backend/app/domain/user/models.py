@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -9,5 +10,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String,nullable=False)
     full_name = Column(String, nullable=True)
+    role = Column(String, default="user") # "user", "admin"
+    plan = Column(String, default="free") # "free", "hobby", "startup", "enterprise"
     is_active = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), server_default= func.now())
+
+    teams = relationship("UserTeam", back_populates="user", cascade="all, delete-orphan")

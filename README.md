@@ -31,11 +31,29 @@ FlowOps is a SaaS platform built with FastAPI, Next.js, and PostgreSQL.
    cp .env.example .env
    ```
 
-3. **Run with Docker**
+3. **Run with Docker (Recommended)**
+   This command spins up the entire stack: Backend (FastAPI), Frontend (Next.js), Worker (Celery), Redis, and Postgres.
    ```bash
    docker-compose up --build
    ```
+   *The first build may take a few minutes.*
+
+   **Useful Commands:**
+   - **Stop containers:** `Ctrl+C` or `docker-compose down`
+   - **View logs:** `docker-compose logs -f`
+   - **Rebuild specific service:** `docker-compose up -d --build --no-deps backend`
+   - **Access DB shell:** `docker-compose exec db psql -U postgres -d flowops`
 
 4. **Access the App**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000/docs
+
+5. **Testing**
+   - **Backend Tests:**
+     ```bash
+     docker-compose exec backend pytest
+     ```
+   - **Frontend Tests:**
+     ```bash
+     cd frontend && npm test
+     ```
