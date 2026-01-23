@@ -55,7 +55,7 @@ export default function Pricing() {
                 return;
             }
 
-            const response = await api.post('/subscriptions/create-checkout-session', null, {
+            const response = await api.post('/billing/create-checkout-session', null, {
                 params: { price_id: priceId }
             });
             window.location.href = response.data.checkout_url;
