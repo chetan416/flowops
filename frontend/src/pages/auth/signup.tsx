@@ -32,13 +32,17 @@ export default function Signup() {
             login(response.data.access_token);
             router.push('/dashboard');
         } catch (err: any) {
-            console.error('Signup failed', err);
             if (err.response && err.response.status === 400) {
                 if (err.response.data.detail === "User already exists") {
                     setError("This email is already registered. Please login or use a different email.");
                     return;
                 }
+                // Handle other 400 errors (e.g. validation)
+                setError(err.response.data.detail || 'Validation error occurred');
+                return;
             }
+
+            console.error('Signup failed', err);
             setError(err.response?.data?.detail || 'Failed to sign up');
         }
     };
