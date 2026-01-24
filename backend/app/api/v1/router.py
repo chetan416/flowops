@@ -16,3 +16,7 @@ api_router.include_router(reliability.router)
 api_router.include_router(websockets.router)
 api_router.include_router(billing.router)
 
+@api_router.get("/health")
+def api_health_check():
+    return {"status": "healthy"}
+

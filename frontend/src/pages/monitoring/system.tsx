@@ -14,7 +14,7 @@ export default function SystemStatusPage() {
                 // but we can infer from a simple ping or root.
                 // Or check the /metrics endpoint if possible (might CORS).
                 // Let's assume backend is UP if we can hit it.
-                await api.get('/');
+                await api.get('/health');
                 setHealth({ status: 'healthy', database: 'connected', redis: 'connected' });
             } catch (err) {
                 setHealth({ status: 'degraded' });
